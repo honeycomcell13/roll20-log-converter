@@ -710,3 +710,46 @@ dialog::backdrop {
     opacity: 1;
   }
 }
+
+/* 테마색을 중립적인 회색으로 변경 */
+
+.chapter,
+.check-banner {
+  color: #ffffff !important;
+  background: #33363b !important;
+}
+
+.divider-text {
+  color: #55585d !important;
+}
+
+/* 롤20 원본 판정표의 고정 너비 제거 */
+
+.roll-wrap,
+.message.general,
+.sheet-rolltemplate-coc-1 {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.roll-table,
+.message table,
+.sheet-rolltemplate-coc-1 table {
+  width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed !important;
+}
+
+.roll-table td,
+.roll-table th,
+.message table td,
+.message table th {
+  min-width: 0 !important;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.inlinerollresult {
+  max-width: 100%;
+  white-space: normal;
+}
