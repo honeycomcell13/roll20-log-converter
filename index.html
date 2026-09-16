@@ -1,6 +1,152 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="롤20 채팅 로그를 편집하고 HTML로 저장합니다."><title>롤20 아카이브 편집기</title><link rel="stylesheet" href="./style.css?v=4"></head><body>
-<header class="site-header"><a class="logo" href="./">ROLL20 ARCHIVE <b>EDITOR</b></a><span>브라우저에서만 처리 · 서버 전송 없음</span></header>
-<main><section id="import-view" class="import-view"><div class="intro"><p class="step">01 — IMPORT</p><h1>로그를 불러오세요.</h1><p>마크다운·롤20 HTML 파일을 넣거나, 웹페이지에서 복사한 내용을 그대로 붙여넣을 수 있어요.</p></div><div class="import-card"><div id="dropzone" class="dropzone" tabindex="0" role="button"><input id="file-input" type="file" accept=".md,.markdown,.txt,.html,text/plain,text/markdown,text/html"><strong>파일 선택 또는 드래그</strong><span>.md · .txt · .html</span></div><div class="or"><span>또는</span></div><div id="rich-input" class="rich-input" contenteditable="true" data-placeholder="여기에 Ctrl+V로 붙여넣으세요."></div><p class="help">웹페이지에서 복사하면 이미지와 서식이 포함된 HTML을 우선 사용해요.</p><div class="start-row"><label>세션 제목<input id="session-title" placeholder="입력하지 않으면 파일명으로 정해져요"></label><button id="convert-button" type="button" class="primary">편집 시작</button></div><p id="import-error" class="error" hidden></p></div></section>
-<section id="editor-view" class="editor-view" hidden><div class="editor-head"><div class="editor-title"><button id="reset-button" type="button" class="text-button">← 다른 로그 불러오기</button><input id="title-input" aria-label="세션 제목"></div><div class="actions"><button id="preview-button" type="button">미리보기</button><button id="download-button" type="button" class="primary">HTML 저장</button></div></div><div class="options"><div class="cover-option"><label class="file-button" for="cover-input">상단 썸네일 선택</label><input id="cover-input" type="file" accept="image/*"><span id="cover-label">선택 안 함</span><button id="remove-cover" type="button" class="small" hidden>제거</button></div><label class="check"><input id="embed-images" type="checkbox" checked> 인장을 HTML 안에 저장</label></div><div id="cover-preview" class="cover-preview" hidden><img alt="상단 썸네일 미리보기"></div><div class="summary"><span id="message-count"></span><span id="character-count"></span><span id="handout-count"></span></div><div id="image-status" class="image-status" hidden></div><p class="edit-help">이름과 대사, 판정표, 핸드아웃을 직접 눌러 수정할 수 있어요.</p><div id="timeline" class="timeline"></div></section></main>
-<dialog id="handout-dialog"><div class="dialog-head"><div><p class="step">INSERT</p><h2>핸드아웃 추가</h2></div><button id="modal-x" type="button" class="close" aria-label="닫기">×</button></div><div class="dialog-body"><label>형식<select id="handout-type"><option value="text">텍스트</option><option value="image">이미지</option></select></label><label>제목<input id="handout-title" placeholder="비워두면 제목 없는 핸드아웃"></label><label id="text-field">본문<textarea id="handout-body" placeholder="본문을 입력하세요."></textarea></label><label id="image-field" hidden>이미지<input id="handout-image" type="file" accept="image/*"><span id="image-name" class="image-name">이미지 선택</span></label></div><div class="dialog-actions"><button id="modal-cancel" type="button">취소</button><button id="add-handout" type="button" class="primary">추가</button></div></dialog>
-<dialog id="preview-dialog" class="preview-dialog"><div class="preview-top"><strong>HTML 미리보기</strong><button id="preview-close" type="button" class="close">×</button></div><iframe id="preview-frame" title="HTML 미리보기"></iframe></dialog><div id="toast" class="toast" hidden></div><script src="./app.js?v=4"></script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="롤20 채팅 로그를 편집하고 HTML로 저장합니다.">
+<title>롤20 아카이브 편집기</title>
+<link rel="stylesheet" href="./style.css?v=5">
+</head>
+<body>
+<header class="site-header">
+<a class="logo" href="./">ROLL20 ARCHIVE <b>EDITOR</b></a>
+<span>브라우저에서만 처리 · 서버 전송 없음</span>
+</header>
+
+<main>
+<section id="import-view" class="import-view">
+<div class="intro">
+<p class="step">01 — IMPORT</p>
+<h1>로그를 불러오세요.</h1>
+<p>마크다운·롤20 HTML 파일을 넣거나, 웹페이지에서 복사한 내용을 그대로 붙여넣을 수 있어요.</p>
+</div>
+
+<div class="import-card">
+<div id="dropzone" class="dropzone" tabindex="0" role="button">
+<input id="file-input" type="file" accept=".md,.markdown,.txt,.html,text/plain,text/markdown,text/html">
+<strong>파일 선택 또는 드래그</strong>
+<span>.md · .txt · .html</span>
+</div>
+
+<div class="or"><span>또는</span></div>
+
+<div id="rich-input" class="rich-input" contenteditable="true" data-placeholder="여기에 Ctrl+V로 붙여넣으세요."></div>
+<p class="help">웹페이지에서 복사하면 이미지와 서식이 포함된 HTML을 우선 사용해요.</p>
+
+<div class="start-row">
+<label>
+세션 제목
+<input id="session-title" placeholder="입력하지 않으면 파일명으로 정해져요">
+</label>
+<button id="convert-button" type="button" class="primary">편집 시작</button>
+</div>
+
+<p id="import-error" class="error" hidden></p>
+</div>
+</section>
+
+<section id="editor-view" class="editor-view" hidden>
+<div class="editor-head">
+<div class="editor-title">
+<button id="reset-button" type="button" class="text-button">← 다른 로그 불러오기</button>
+<input id="title-input" aria-label="세션 제목">
+</div>
+
+<div class="actions">
+<button id="preview-button" type="button">미리보기</button>
+<button id="download-button" type="button" class="primary">HTML 저장</button>
+</div>
+</div>
+
+<div class="options">
+<div class="cover-option">
+<label class="file-button" for="cover-input">상단 썸네일 선택</label>
+<input id="cover-input" type="file" accept="image/*">
+<span id="cover-label">선택 안 함</span>
+<button id="remove-cover" type="button" class="small" hidden>제거</button>
+</div>
+
+<label class="check">
+<input id="embed-images" type="checkbox" checked>
+인장을 HTML 안에 저장
+</label>
+</div>
+
+<div id="cover-preview" class="cover-preview" hidden>
+<img alt="상단 썸네일 미리보기">
+</div>
+
+<div class="summary">
+<span id="message-count"></span>
+<span id="character-count"></span>
+<span id="handout-count"></span>
+</div>
+
+<details id="gm-journal-panel" class="gm-panel">
+<summary>
+GM 저널 선택
+<span id="gm-summary">선택 안 함</span>
+</summary>
+<p>선택한 이름의 발화는 인장과 이름을 숨기고 지문처럼 표시해요. 별도 저널이 없다면 아무것도 선택하지 않아도 됩니다.</p>
+<div id="gm-journal-list" class="gm-list"></div>
+</details>
+
+<div id="image-status" class="image-status" hidden></div>
+<p class="edit-help">이름과 대사, 판정표, 핸드아웃을 직접 눌러 수정할 수 있어요.</p>
+<div id="timeline" class="timeline"></div>
+</section>
+</main>
+
+<dialog id="handout-dialog">
+<div class="dialog-head">
+<div>
+<p class="step">INSERT</p>
+<h2>핸드아웃 추가</h2>
+</div>
+<button id="modal-x" type="button" class="close" aria-label="닫기">×</button>
+</div>
+
+<div class="dialog-body">
+<label>
+형식
+<select id="handout-type">
+<option value="text">텍스트</option>
+<option value="image">이미지</option>
+</select>
+</label>
+
+<label>
+제목
+<input id="handout-title" placeholder="비워두면 제목 없는 핸드아웃">
+</label>
+
+<label id="text-field">
+본문
+<textarea id="handout-body" placeholder="본문을 입력하세요."></textarea>
+</label>
+
+<label id="image-field" hidden>
+이미지
+<input id="handout-image" type="file" accept="image/*">
+<span id="image-name" class="image-name">이미지 선택</span>
+</label>
+</div>
+
+<div class="dialog-actions">
+<button id="modal-cancel" type="button">취소</button>
+<button id="add-handout" type="button" class="primary">추가</button>
+</div>
+</dialog>
+
+<dialog id="preview-dialog" class="preview-dialog">
+<div class="preview-top">
+<strong>HTML 미리보기</strong>
+<button id="preview-close" type="button" class="close">×</button>
+</div>
+<iframe id="preview-frame" title="HTML 미리보기"></iframe>
+</dialog>
+
+<div id="toast" class="toast" hidden></div>
+<script src="./app.js?v=5"></script>
+</body>
+</html>
