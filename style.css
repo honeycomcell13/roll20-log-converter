@@ -323,6 +323,58 @@ button,
   border-bottom: 1px solid var(--line);
 }
 
+.gm-panel {
+  margin: 12px 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fff;
+}
+
+.gm-panel summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.gm-panel summary span {
+  margin-left: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.gm-panel p {
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gm-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.gm-list label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.gm-list input {
+  width: auto;
+  margin: 0;
+}
+
+.gm-list .suggested {
+  border-color: #aeb2b7;
+  background: #f3f4f4;
+}
+
 .image-status {
   margin-top: 12px;
   padding: 9px 12px;
@@ -404,7 +456,7 @@ button,
   padding: 8px 72px 8px 50px;
   overflow: hidden;
   border-top: 2px solid #e1e1e1;
-  background: #f1f1f1 !important;
+  background: #f1f1f1;
 }
 
 .message.desc {
@@ -414,6 +466,16 @@ button,
   text-align: center;
   font-style: italic;
   font-weight: 700;
+}
+
+.message.gm-journal {
+  padding: 11px 70px;
+  border-top: 2px solid #e1e1e1;
+  background: #f1f1f1;
+  text-align: center;
+  font-style: italic;
+  font-weight: 700;
+  white-space: pre-wrap;
 }
 
 .avatar {
@@ -461,6 +523,11 @@ button,
   padding: 8px 12px;
 }
 
+.chapter-line,
+.chapter-title {
+  display: block;
+}
+
 .check-banner {
   display: inline-block;
   padding: 5px 25px;
@@ -475,7 +542,7 @@ button,
 .roll-wrap {
   max-width: 100%;
   padding: 8px 72px 9px 50px;
-  overflow: hidden;
+  overflow-x: auto;
   background: #f1f1f1;
   border-top: 2px solid #e1e1e1;
 }
@@ -483,6 +550,7 @@ button,
 .roll-table {
   width: 100% !important;
   max-width: 100% !important;
+  min-width: 0 !important;
   table-layout: fixed !important;
   border-collapse: collapse;
   background: #fff;
@@ -501,9 +569,11 @@ button,
 .roll-table td,
 .roll-table th {
   min-width: 0 !important;
+  max-width: 100% !important;
   padding: 4px 6px;
   border: 1px solid #111;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .roll-table th {
@@ -702,7 +772,8 @@ dialog::backdrop {
     padding-right: 45px;
   }
 
-  .message.desc {
+  .message.desc,
+  .message.gm-journal {
     padding-left: 45px;
     padding-right: 45px;
   }
