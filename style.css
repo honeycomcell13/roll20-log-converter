@@ -89,61 +89,9 @@ main {
   box-shadow: 0 20px 60px #2221;
 }
 
-.dropzone {
-  height: 130px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #aeb1b5;
-  border-radius: 5px;
-  background: #fafafa;
-  cursor: pointer;
-}
-
-.dropzone:hover,
-.dropzone.drag {
-  border-color: #555;
-  background: #f0f1f1;
-}
-
-.dropzone input,
-#cover-input {
-  display: none;
-}
-
-.dropzone strong {
-  font-size: 17px;
-}
-
-.dropzone span {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.or {
-  height: 45px;
-  display: flex;
-  align-items: center;
-  color: #92969a;
-  font-size: 12px;
-}
-
-.or::before,
-.or::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: var(--line);
-}
-
-.or span {
-  padding: 0 10px;
-}
-
 .rich-input {
   width: 100%;
-  height: 190px;
+  height: 300px;
   padding: 13px;
   overflow: auto;
   border: 1px solid var(--line);
@@ -280,6 +228,10 @@ button,
   gap: 9px;
   color: var(--muted);
   font-size: 12px;
+}
+
+#cover-input {
+  display: none;
 }
 
 .file-button {
@@ -459,6 +411,16 @@ button,
   background: #f1f1f1;
 }
 
+.message.general.continuation {
+  border-top: 0;
+  padding-top: 3px;
+}
+
+.message.general.roll-speaker {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+
 .message.desc {
   padding: 11px 70px;
   border-top: 2px solid #e1e1e1;
@@ -468,14 +430,27 @@ button,
   font-weight: 700;
 }
 
+.message.desc.continuation {
+  border-top: 0;
+}
+
 .message.gm-journal {
   padding: 11px 70px;
   border-top: 2px solid #e1e1e1;
-  background: #f1f1f1;
-  text-align: center;
+  background: #f1f1f1 !important;
+  text-align: center !important;
   font-style: italic;
   font-weight: 700;
   white-space: pre-wrap;
+}
+
+.message.gm-journal.continuation {
+  border-top: 0;
+}
+
+.message.gm-journal .editable {
+  display: block;
+  text-align: center !important;
 }
 
 .avatar {
@@ -547,12 +522,21 @@ button,
   border-top: 2px solid #e1e1e1;
 }
 
+.roll-wrap.attached {
+  border-top: 0;
+  padding-top: 2px;
+}
+
 .roll-table {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
   table-layout: fixed !important;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #111;
+  border-radius: 9px;
+  overflow: hidden;
   background: #fff;
   color: #111;
   font-size: 13px;
@@ -560,7 +544,8 @@ button,
 
 .roll-table caption {
   padding: 4px;
-  border: 1px solid #111;
+  border: 0;
+  border-bottom: 1px solid #111;
   background: #111;
   color: #fff;
   font-weight: 700;
@@ -571,9 +556,20 @@ button,
   min-width: 0 !important;
   max-width: 100% !important;
   padding: 4px 6px;
-  border: 1px solid #111;
+  border: 0;
+  border-top: 1px solid #111;
+  border-left: 1px solid #111;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.roll-table tr:first-child td,
+.roll-table tr:first-child th {
+  border-top: 0;
+}
+
+.roll-table tr > *:first-child {
+  border-left: 0;
 }
 
 .roll-table th {
