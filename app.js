@@ -36,9 +36,7 @@ function sanitize(html){
   const d=new DOMParser().parseFromString(`<div>${html||""}</div>`,"text/html");
   const r=d.body.firstElementChild;
 
-  r.querySelectorAll(
-    "script,style,iframe,object,embed,form,input,button"
-  ).forEach(x=>x.remove());
+  r.querySelectorAll("script,style,iframe,object,embed,form,input,button").forEach(x=>x.remove());
 
   r.querySelectorAll("*").forEach(x=>{
     [...x.attributes].forEach(a=>{
@@ -90,19 +88,13 @@ function tableFromMarkdown(lines){
           .trim()
           .replace(/^\||\|$/g,"")
           .split("|")
-          .map(cell=>
-            unescapeMd(cell.trim()).replace(/^\*\*|\*\*$/g,"")
-          )
+          .map(cell=>unescapeMd(cell.trim()).replace(/^\*\*|\*\*$/g,""))
       )
   };
 }
 
 function parseMarkdown(md){
-  const lines=md
-    .replace(/^\uFEFF/,"")
-    .replace(/\r/g,"")
-    .split("\n");
-
+  const lines=md.replace(/^\uFEFF/,"").replace(/\r/g,"").split("\n");
   const out=[];
   let image="";
   let i=0;
@@ -115,9 +107,7 @@ function parseMarkdown(md){
       continue;
     }
 
-    const im=line.match(
-      /^!?\[([^\]]*image[^\]]*)\]\((https?:\/\/[^)]+)\)$/i
-    );
+    const im=line.match(/^!?\[([^\]]*image[^\]]*)\]\((https?:\/\/[^)]+)\)$/i);
 
     if(im){
       const decorated=/[*_]/.test(im[1]);
@@ -197,16 +187,12 @@ function parseMarkdown(md){
 
     if(narration){
       const body=unescapeMd(narration[1]);
-      const chapter=body.match(
-        /^(.*?CHAPTER.*?[─━―-]{3,})\s*(.+)$/i
-      );
+      const chapter=body.match(/^(.*?CHAPTER.*?[─━―-]{3,})\s*(.+)$/i);
 
       if(chapter){
         out.push({
           type:"narration",
-          bodyHtml:
-            `<span class="chapter-line">${esc(chapter[1])}</span>`+
-            `<span class="chapter-title">${esc(chapter[2])}</span>`
+          bodyHtml:`<span class="chapter-line">${esc(chapter[1])}</span><span class="chapter-title">${esc(chapter[2])}</span>`
         });
       }else{
         out.push({
@@ -268,9 +254,7 @@ function parseMarkdown(md){
 function htmlTable(table){
   return{
     type:"table",
-    caption:
-      table.querySelector("caption")?.textContent?.trim()||
-      "",
+    caption:table.querySelector("caption")?.textContent?.trim()||"",
     rows:[...table.querySelectorAll("tr")].map(row=>
       [...row.children].map(cell=>cell.textContent.trim())
     )
@@ -280,14 +264,12 @@ function htmlTable(table){
 function parseRoll20Html(html){
   const d=new DOMParser().parseFromString(html,"text/html");
   const out=[];
-
   let lastSpeaker="";
   let lastAvatar="";
 
   [...d.body.children].forEach(el=>{
     if(el.matches(".message.desc")){
       const c=el.cloneNode(true);
-
       c.querySelectorAll(".spacer").forEach(x=>x.remove());
 
       out.push({
@@ -301,43 +283,18 @@ function parseRoll20Html(html){
 
     if(el.matches(".message.general")){
       const c=el.cloneNode(true);
-
-      const currentAvatar=
-        c.querySelector(".avatar img")?.src||
-        "";
-
-      const currentSpeaker=
-        c
-          .querySelector(".by")
-          ?.textContent
-          ?.replace(/:\s*$/,"")
-          .trim()||
-        "";
+      const currentAvatar=c.querySelector(".avatar img")?.src||"";
+      const currentSpeaker=c.querySelector(".by")?.textContent?.replace(/:\s*$/,"").trim()||"";
 
       if(currentSpeaker)lastSpeaker=currentSpeaker;
       if(currentAvatar)lastAvatar=currentAvatar;
 
-      const speaker=
-        currentSpeaker||
-        lastSpeaker||
-        "이름 없음";
+      const speaker=currentSpeaker||lastSpeaker||"이름 없음";
+      const avatar=currentAvatar||lastAvatar||"";
+      const tables=[...c.querySelectorAll("table")].map(htmlTable);
 
-      const avatar=
-        currentAvatar||
-        lastAvatar||
-        "";
-
-      const tables=[
-        ...c.querySelectorAll("table")
-      ].map(htmlTable);
-
-      c.querySelectorAll(
-        ".sheet-rolltemplate-coc-1,table"
-      ).forEach(x=>x.remove());
-
-      c.querySelectorAll(
-        ".spacer,.avatar,.by"
-      ).forEach(x=>x.remove());
+      c.querySelectorAll(".sheet-rolltemplate-coc-1,table").forEach(x=>x.remove());
+      c.querySelectorAll(".spacer,.avatar,.by").forEach(x=>x.remove());
 
       const bodyHtml=sanitize(c.innerHTML);
       const hasBody=textOf(bodyHtml).trim();
@@ -356,13 +313,8 @@ function parseRoll20Html(html){
       return;
     }
 
-    if(
-      el.matches(".sheet-rolltemplate-coc-1")||
-      el.tagName==="TABLE"
-    ){
-      const t=el.matches("table")
-        ?el
-        :el.querySelector("table");
+    if(el.matches(".sheet-rolltemplate-coc-1")||el.tagName==="TABLE"){
+      const t=el.matches("table")?el:el.querySelector("table");
 
       if(t)out.push(htmlTable(t));
       return;
@@ -382,10 +334,8 @@ function parseRoll20Html(html){
 }
 
 function isHtml(s){
-  return(
-    /<(div|table|p|span)[\s>]/i.test(s)&&
-    /(class=["'][^"']*(message|sheet-rolltemplate)|<table)/i.test(s)
-  );
+  return /<(div|table|p|span)[\s>]/i.test(s)&&
+    /(class=["'][^"']*(message|sheet-rolltemplate)|<table)/i.test(s);
 }
 
 function initials(name){
@@ -394,49 +344,27 @@ function initials(name){
 
 function narrationClass(text){
   if(/CHAPTER|챕터/i.test(text))return"chapter";
-
-  if(/판정/.test(text)&&/[✷✦]/.test(text)){
-    return"check-banner";
-  }
-
-  if(/^[─━―\s✦✷]+$/.test(text)){
-    return"divider-text";
-  }
-
+  if(/판정/.test(text)&&/[✷✦]/.test(text))return"check-banner";
+  if(/^[─━―\s✦✷]+$/.test(text))return"divider-text";
   return"";
 }
 
 function resultClass(v){
-  if(/대성공|극단|어려운|보통 성공|성공/.test(v)){
-    return"result-success";
-  }
-
-  if(/대실패|실패/.test(v)){
-    return"result-fail";
-  }
-
+  if(/대성공|극단|어려운|보통 성공|성공/.test(v))return"result-success";
+  if(/대실패|실패/.test(v))return"result-fail";
   return"";
 }
 
 function styleAttr(style){
-  return style
-    ?` style="${esc(style)}"`
-    :"";
+  return style?` style="${esc(style)}"`:"";
 }
 
 function speechStyle(style){
   const el=document.createElement("span");
-
-  el.setAttribute(
-    "style",
-    cleanStyle(style)
-  );
+  el.setAttribute("style",cleanStyle(style));
 
   [...el.style].forEach(name=>{
-    if(
-      /^background(?:-|$)/i.test(name)||
-      /^box-shadow$/i.test(name)
-    ){
+    if(/^background(?:-|$)/i.test(name)||/^box-shadow$/i.test(name)){
       el.style.removeProperty(name);
     }
   });
@@ -445,10 +373,7 @@ function speechStyle(style){
 }
 
 function blankSpeech(b){
-  return(
-    b?.type==="speech"&&
-    !textOf(b.bodyHtml||b.body||"").trim()
-  );
+  return b?.type==="speech"&&!textOf(b.bodyHtml||b.body||"").trim();
 }
 
 function tableIsAttached(i){
@@ -465,179 +390,72 @@ function renderBlock(b,i,edit=true){
   let h="";
 
   if(b.type==="speech"){
-    const body=b.bodyHtml
-      ?sanitize(b.bodyHtml)
-      :inline(b.body);
-
+    const body=b.bodyHtml?sanitize(b.bodyHtml):inline(b.body);
     const prev=blocks[i-1];
-
-    const same=
-      prev?.type==="speech"&&
-      prev.speaker===b.speaker;
-
-    const nextTable=
-      blocks[i+1]?.type==="table"&&
-      blankSpeech(b);
-
-    const continuation=
-      same
-        ?" continuation"
-        :"";
+    const same=prev?.type==="speech"&&prev.speaker===b.speaker;
+    const nextTable=blocks[i+1]?.type==="table"&&blankSpeech(b);
+    const continuation=same?" continuation":"";
 
     if(gmSpeakers.has(b.speaker)){
-      h=
-        `<div class="message gm-journal${continuation}">`+
-        `<span class="editable" ${
-          edit
-            ?'contenteditable="true" data-field="bodyHtml"'
-            :""
-        }>${body}</span>`+
-        `</div>`;
+      h=`<div class="message gm-journal${continuation}"><span class="editable" ${edit?'contenteditable="true" data-field="bodyHtml"':""}>${body}</span></div>`;
     }else{
-      h=
-        `<div class="message general${continuation}${nextTable?" roll-speaker":""}"${styleAttr(speechStyle(b.sourceStyle))}>`+
-        (
-          b.avatar
-            ?`<img class="avatar" src="${esc(b.avatar)}" alt="${esc(b.speaker)} 인장">`
-            :`<span class="avatar placeholder">${esc(initials(b.speaker))}</span>`
-        )+
-        `<span class="by editable" ${
-          edit
-            ?'contenteditable="true" data-field="speaker"'
-            :""
-        }>${esc(b.speaker)}</span>`+
-        `<span>:</span> `+
-        `<span class="editable" ${
-          edit
-            ?'contenteditable="true" data-field="bodyHtml"'
-            :""
-        }>${body}</span>`+
-        `</div>`;
+      h=`<div class="message general${continuation}${nextTable?" roll-speaker":""}"${styleAttr(speechStyle(b.sourceStyle))}>${
+        b.avatar
+          ?`<img class="avatar" src="${esc(b.avatar)}" alt="${esc(b.speaker)} 인장">`
+          :`<span class="avatar placeholder">${esc(initials(b.speaker))}</span>`
+      }<span class="by editable" ${edit?'contenteditable="true" data-field="speaker"':""}>${esc(b.speaker)}</span><span>:</span> <span class="editable" ${edit?'contenteditable="true" data-field="bodyHtml"':""}>${body}</span></div>`;
     }
   }
 
   if(b.type==="narration"){
-    const body=b.bodyHtml
-      ?sanitize(b.bodyHtml)
-      :inline(b.body);
+    const body=b.bodyHtml?sanitize(b.bodyHtml):inline(b.body);
+    const hasOriginalStyle=!!b.sourceStyle||/\sstyle=["']/i.test(body);
+    const cl=hasOriginalStyle?"":narrationClass(textOf(body));
+    const continuation=blocks[i-1]?.type==="narration"?" continuation":"";
 
-    const hasOriginalStyle=
-      !!b.sourceStyle||
-      /\sstyle=["']/i.test(body);
-
-    const cl=hasOriginalStyle
-      ?""
-      :narrationClass(textOf(body));
-
-    const continuation=
-      blocks[i-1]?.type==="narration"
-        ?" continuation"
-        :"";
-
-    h=
-      `<div class="message desc${continuation}"${styleAttr(b.sourceStyle)}>`+
-      `<span class="editable ${cl}" ${
-        edit
-          ?'contenteditable="true" data-field="bodyHtml"'
-          :""
-      }>${body}</span>`+
-      `</div>`;
+    h=`<div class="message desc${continuation}"${styleAttr(b.sourceStyle)}><span class="editable ${cl}" ${edit?'contenteditable="true" data-field="bodyHtml"':""}>${body}</span></div>`;
   }
 
   if(b.type==="table"){
-    h=
-      `<div class="roll-wrap${tableIsAttached(i)?" attached":""}">`+
-      `<table class="roll-table">`+
-      (
-        b.caption
-          ?`<caption class="editable" ${
-            edit
-              ?'contenteditable="true" data-field="caption"'
-              :""
-          }>${esc(b.caption)}</caption>`
-          :""
-      )+
-      `<tbody>`+
-      b.rows.map((row,ri)=>
-        `<tr>`+
+    h=`<div class="roll-wrap${tableIsAttached(i)?" attached":""}"><table class="roll-table">${
+      b.caption
+        ?`<caption class="editable" ${edit?'contenteditable="true" data-field="caption"':""}>${esc(b.caption)}</caption>`
+        :""
+    }<tbody>${
+      b.rows.map((row,ri)=>`<tr>${
         row.map((v,ci)=>{
-          const tag=ci===0
-            ?"th"
-            :"td";
+          const tag=ci===0?"th":"td";
+          const cl=ci===1&&/판정결과/.test(row[0])?resultClass(v):"";
 
-          const cl=
-            ci===1&&/판정결과/.test(row[0])
-              ?resultClass(v)
-              :"";
-
-          return(
-            `<${tag} class="editable ${cl}" ${
-              edit
-                ?`contenteditable="true" data-row="${ri}" data-cell="${ci}"`
-                :""
-            }>${esc(v)}</${tag}>`
-          );
-        }).join("")+
-        `</tr>`
-      ).join("")+
-      `</tbody>`+
-      `</table>`+
-      `</div>`;
+          return`<${tag} class="editable ${cl}" ${
+            edit
+              ?`contenteditable="true" data-row="${ri}" data-cell="${ci}"`
+              :""
+          }>${esc(v)}</${tag}>`;
+        }).join("")
+      }</tr>`).join("")
+    }</tbody></table></div>`;
   }
 
   if(b.type==="raw"){
-    h=
-      `<div class="raw editable" ${
-        edit
-          ?'contenteditable="true" data-field="body"'
-          :""
-      }>${inline(b.body)}</div>`;
+    h=`<div class="raw editable" ${edit?'contenteditable="true" data-field="body"':""}>${inline(b.body)}</div>`;
   }
 
   if(b.type==="contentImage"){
-    h=
-      `<div class="content-image">`+
-      `<img src="${esc(b.src)}" alt="삽입 이미지">`+
-      `</div>`;
+    h=`<div class="content-image"><img src="${esc(b.src)}" alt="삽입 이미지"></div>`;
   }
 
   if(b.type==="handout"){
-    h=
-      `<article class="handout">`+
-      `<div class="handout-head">`+
-      `<strong class="editable" ${
-        edit
-          ?'contenteditable="true" data-field="title"'
-          :""
-      }>${esc(b.title)}</strong>`+
-      `<small>HANDOUT</small>`+
-      `</div>`+
-      `<div class="handout-body editable" ${
-        edit&&b.mode==="text"
-          ?'contenteditable="true" data-field="body"'
-          :""
-      }>`+
-      (
-        b.mode==="image"
-          ?`<img src="${esc(b.data)}" alt="${esc(b.title)}">`
-          :inline(b.body)
-      )+
-      `</div>`+
-      `</article>`;
+    h=`<article class="handout"><div class="handout-head"><strong class="editable" ${edit?'contenteditable="true" data-field="title"':""}>${esc(b.title)}</strong><small>HANDOUT</small></div><div class="handout-body editable" ${edit&&b.mode==="text"?'contenteditable="true" data-field="body"':""}>${
+      b.mode==="image"
+        ?`<img src="${esc(b.data)}" alt="${esc(b.title)}">`
+        :inline(b.body)
+    }</div></article>`;
   }
 
   if(!edit)return h;
 
-  return(
-    `<div class="block" data-index="${i}">`+
-    h+
-    `<div class="block-tools">`+
-    `<button type="button" data-move="up">↑</button>`+
-    `<button type="button" data-delete>삭제</button>`+
-    `<button type="button" data-move="down">↓</button>`+
-    `</div>`+
-    `</div>`
-  );
+  return`<div class="block" data-index="${i}">${h}<div class="block-tools"><button type="button" data-move="up">↑</button><button type="button" data-delete>삭제</button><button type="button" data-move="down">↓</button></div></div>`;
 }
 
 function sync(el){
@@ -645,17 +463,10 @@ function sync(el){
 
   if(!wrap)return;
 
-  const b=blocks[
-    Number(wrap.dataset.index)
-  ];
+  const b=blocks[Number(wrap.dataset.index)];
 
   if(el.dataset.row!==undefined){
-    b.rows[
-      Number(el.dataset.row)
-    ][
-      Number(el.dataset.cell)
-    ]=el.textContent;
-
+    b.rows[Number(el.dataset.row)][Number(el.dataset.cell)]=el.textContent;
     return;
   }
 
@@ -664,49 +475,33 @@ function sync(el){
     return;
   }
 
-  if(el.dataset.field){
-    b[el.dataset.field]=el.textContent;
-  }
+  if(el.dataset.field)b[el.dataset.field]=el.textContent;
 }
 
 function updateGmOptions(){
   const names=[
     ...new Set(
       blocks
-        .filter(b=>
-          b.type==="speech"&&
-          b.speaker&&
-          b.speaker!=="이름 없음"
-        )
+        .filter(b=>b.type==="speech"&&b.speaker&&b.speaker!=="이름 없음")
         .map(b=>b.speaker)
     )
   ];
 
   gmSpeakers=new Set(
-    [...gmSpeakers].filter(name=>
-      names.includes(name)
-    )
+    [...gmSpeakers].filter(name=>names.includes(name))
   );
 
-  $("#gm-journal-list").innerHTML=
-    names.length
-      ?names.map(name=>{
-        const suggested=
-          /\(GM\)|^GM$|^KP$|^☞|마스터|저널/i.test(name);
+  $("#gm-journal-list").innerHTML=names.length
+    ?names.map(name=>{
+      const suggested=/\(GM\)|^GM$|^KP$|^☞|마스터|저널/i.test(name);
 
-        return(
-          `<label class="${suggested?"suggested":""}">`+
-          `<input type="checkbox" value="${esc(name)}" ${gmSpeakers.has(name)?"checked":""}>`+
-          `${esc(name)}${suggested?" · 추천":""}`+
-          `</label>`
-        );
-      }).join("")
-      :`<span class="help">선택할 발화자가 없어요.</span>`;
+      return`<label class="${suggested?"suggested":""}"><input type="checkbox" value="${esc(name)}" ${gmSpeakers.has(name)?"checked":""}>${esc(name)}${suggested?" · 추천":""}</label>`;
+    }).join("")
+    :`<span class="help">선택할 발화자가 없어요.</span>`;
 
-  $("#gm-summary").textContent=
-    gmSpeakers.size
-      ?[...gmSpeakers].join(", ")
-      :"선택 안 함";
+  $("#gm-summary").textContent=gmSpeakers.size
+    ?[...gmSpeakers].join(", ")
+    :"선택 안 함";
 
   $$("#gm-journal-list input").forEach(input=>{
     input.onchange=()=>{
@@ -716,10 +511,9 @@ function updateGmOptions(){
         gmSpeakers.delete(input.value);
       }
 
-      $("#gm-summary").textContent=
-        gmSpeakers.size
-          ?[...gmSpeakers].join(", ")
-          :"선택 안 함";
+      $("#gm-summary").textContent=gmSpeakers.size
+        ?[...gmSpeakers].join(", ")
+        :"선택 안 함";
 
       render();
     };
@@ -729,79 +523,45 @@ function updateGmOptions(){
 function render(){
   $("#timeline").innerHTML=
     blocks.map((b,i)=>
-      `<div class="insert-slot">`+
-      `<button type="button" data-insert="${i}">＋ 핸드아웃</button>`+
-      `</div>`+
-      renderBlock(b,i)
+      `<div class="insert-slot"><button type="button" data-insert="${i}">＋ 핸드아웃</button></div>${renderBlock(b,i)}`
     ).join("")+
-    `<div class="insert-slot">`+
-    `<button type="button" data-insert="${blocks.length}">＋ 핸드아웃</button>`+
-    `</div>`;
+    `<div class="insert-slot"><button type="button" data-insert="${blocks.length}">＋ 핸드아웃</button></div>`;
 
   const people=new Set(
     blocks
-      .filter(b=>
-        b.type==="speech"&&
-        b.speaker!=="이름 없음"
-      )
+      .filter(b=>b.type==="speech"&&b.speaker!=="이름 없음")
       .map(b=>b.speaker)
   );
 
-  $("#message-count").textContent=
-    `로그 항목 ${blocks.length}`;
-
-  $("#character-count").textContent=
-    `등장인물 ${people.size}`;
-
-  $("#handout-count").textContent=
-    `핸드아웃 ${
-      blocks.filter(b=>b.type==="handout").length
-    }`;
+  $("#message-count").textContent=`로그 항목 ${blocks.length}`;
+  $("#character-count").textContent=`등장인물 ${people.size}`;
+  $("#handout-count").textContent=`핸드아웃 ${blocks.filter(b=>b.type==="handout").length}`;
 
   $$("[data-insert]").forEach(x=>{
-    x.onclick=()=>{
-      openHandout(
-        Number(x.dataset.insert)
-      );
-    };
+    x.onclick=()=>openHandout(Number(x.dataset.insert));
   });
 
   $$("[data-delete]").forEach(x=>{
     x.onclick=()=>{
-      blocks.splice(
-        Number(x.closest(".block").dataset.index),
-        1
-      );
-
+      blocks.splice(Number(x.closest(".block").dataset.index),1);
       render();
     };
   });
 
   $$("[data-move]").forEach(x=>{
     x.onclick=()=>{
-      const i=Number(
-        x.closest(".block").dataset.index
-      );
-
-      const j=
-        x.dataset.move==="up"
-          ?i-1
-          :i+1;
+      const i=Number(x.closest(".block").dataset.index);
+      const j=x.dataset.move==="up"?i-1:i+1;
 
       if(j<0||j>=blocks.length)return;
 
-      [blocks[i],blocks[j]]=
-        [blocks[j],blocks[i]];
-
+      [blocks[i],blocks[j]]=[blocks[j],blocks[i]];
       render();
     };
   });
 
   $$(".editable").forEach(x=>{
-    x.addEventListener(
-      "input",
-      ()=>sync(x)
-    );
+    x.addEventListener("input",()=>sync(x));
   });
 }
 
@@ -855,9 +615,7 @@ $("#rich-input").addEventListener("input",()=>{
 });
 
 $("#convert-button").onclick=()=>{
-  const content=
-    pastedHtml||
-    $("#rich-input").innerText;
+  const content=pastedHtml||$("#rich-input").innerText;
 
   if(!content.trim()){
     fail("붙여넣은 내용이 없어요.");
@@ -869,7 +627,6 @@ $("#convert-button").onclick=()=>{
 
 function openHandout(i){
   insertIndex=i;
-
   $("#handout-title").value="";
   $("#handout-body").value="";
   $("#handout-image").value="";
@@ -888,31 +645,22 @@ $("#modal-x").onclick=closeHandout;
 $("#modal-cancel").onclick=closeHandout;
 
 $("#handout-dialog").addEventListener("click",e=>{
-  if(e.target===$("#handout-dialog")){
-    closeHandout();
-  }
+  if(e.target===$("#handout-dialog"))closeHandout();
 });
 
 $("#handout-type").onchange=e=>{
   const image=e.target.value==="image";
-
   $("#text-field").hidden=image;
   $("#image-field").hidden=!image;
 };
 
 $("#handout-image").onchange=e=>{
-  $("#image-name").textContent=
-    e.target.files[0]?.name||
-    "이미지 선택";
+  $("#image-name").textContent=e.target.files[0]?.name||"이미지 선택";
 };
 
 $("#add-handout").onclick=()=>{
-  const title=
-    $("#handout-title").value.trim()||
-    "제목 없는 핸드아웃";
-
-  const mode=
-    $("#handout-type").value;
+  const title=$("#handout-title").value.trim()||"제목 없는 핸드아웃";
+  const mode=$("#handout-type").value;
 
   if(mode==="text"){
     blocks.splice(insertIndex,0,{
@@ -927,8 +675,7 @@ $("#add-handout").onclick=()=>{
     return;
   }
 
-  const file=
-    $("#handout-image").files[0];
+  const file=$("#handout-image").files[0];
 
   if(!file){
     toast("이미지를 선택해주세요.");
@@ -961,7 +708,6 @@ $("#cover-input").onchange=e=>{
 
   r.onload=()=>{
     coverData=r.result;
-
     $("#cover-preview img").src=coverData;
     $("#cover-preview").hidden=false;
     $("#remove-cover").hidden=false;
@@ -1030,30 +776,13 @@ body{margin:0;background:#fff;color:#333;font:13.65px/1.55 "Segoe UI",Roboto,san
 `;
 
 function documentHtml(data,title){
-  return(
-    `<!doctype html>`+
-    `<html lang="ko">`+
-    `<head>`+
-    `<meta charset="utf-8">`+
-    `<meta name="viewport" content="width=device-width,initial-scale=1">`+
-    `<title>${esc(title)}</title>`+
-    `<style>${exportCss}</style>`+
-    `</head>`+
-    `<body>`+
-    `<main class="archive">`+
-    (
-      coverData
-        ?`<div class="cover"><img src="${coverData}" alt="${esc(title)} 썸네일"></div>`
-        :""
-    )+
-    `<header class="title"><h1>${esc(title)}</h1></header>`+
-    data.map((b,i)=>
-      renderBlock(b,i,false)
-    ).join("")+
-    `</main>`+
-    `</body>`+
-    `</html>`
-  );
+  return`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>${exportCss}</style></head><body><main class="archive">${
+    coverData
+      ?`<div class="cover"><img src="${coverData}" alt="${esc(title)} 썸네일"></div>`
+      :""
+  }<header class="title"><h1>${esc(title)}</h1></header>${
+    data.map((b,i)=>renderBlock(b,i,false)).join("")
+  }</main></body></html>`;
 }
 
 async function embedAvatars(){
@@ -1062,10 +791,7 @@ async function embedAvatars(){
   const urls=[
     ...new Set(
       copy
-        .filter(b=>
-          b.avatar&&
-          !b.avatar.startsWith("data:")
-        )
+        .filter(b=>b.avatar&&!b.avatar.startsWith("data:"))
         .map(b=>b.avatar)
     )
   ];
@@ -1077,9 +803,7 @@ async function embedAvatars(){
 
   for(let i=0;i<urls.length;i++){
     const u=urls[i];
-
-    $("#image-status").textContent=
-      `인장 저장 중 ${i+1}/${urls.length}`;
+    $("#image-status").textContent=`인장 저장 중 ${i+1}/${urls.length}`;
 
     try{
       const response=await fetch(u);
@@ -1090,16 +814,13 @@ async function embedAvatars(){
 
       const data=await new Promise((yes,no)=>{
         const r=new FileReader();
-
         r.onload=()=>yes(r.result);
         r.onerror=no;
         r.readAsDataURL(blob);
       });
 
       copy.forEach(b=>{
-        if(b.avatar===u){
-          b.avatar=data;
-        }
+        if(b.avatar===u)b.avatar=data;
       });
 
       ok++;
@@ -1115,26 +836,18 @@ async function embedAvatars(){
 }
 
 async function finalHtml(){
-  const data=
-    $("#embed-images").checked
-      ?await embedAvatars()
-      :structuredClone(blocks);
+  const data=$("#embed-images").checked
+    ?await embedAvatars()
+    :structuredClone(blocks);
 
-  const title=
-    $("#title-input").value.trim()||
-    "롤20 세션 로그";
+  const title=$("#title-input").value.trim()||"롤20 세션 로그";
 
   return documentHtml(data,title);
 }
 
 $("#preview-button").onclick=async()=>{
   const html=await finalHtml();
-
-  const url=URL.createObjectURL(
-    new Blob([html],{
-      type:"text/html"
-    })
-  );
+  const url=URL.createObjectURL(new Blob([html],{type:"text/html"}));
 
   $("#preview-frame").src=url;
   $("#preview-dialog").showModal();
@@ -1146,11 +859,7 @@ $("#preview-close").onclick=()=>{
 
 $("#download-button").onclick=async()=>{
   const html=await finalHtml();
-
-  const title=
-    $("#title-input").value.trim()||
-    "롤20 세션 로그";
-
+  const title=$("#title-input").value.trim()||"롤20 세션 로그";
   const a=document.createElement("a");
 
   a.href=URL.createObjectURL(
@@ -1159,10 +868,7 @@ $("#download-button").onclick=async()=>{
     })
   );
 
-  a.download=
-    title.replace(/[\\/:*?"<>|]/g,"_")+
-    ".html";
-
+  a.download=title.replace(/[\\/:*?"<>|]/g,"_")+".html";
   a.click();
 
   setTimeout(()=>{
